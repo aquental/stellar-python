@@ -12,7 +12,7 @@ def generate_keypair():
     private_key = keypair.secret
     public_key = keypair.public_key
     print("Public Key: " + keypair.public_key)
-    print("Secret Seed: " + keypair.secret)
+    # print("Secret Seed: " + keypair.secret)
 
     # Write keys to a file
     with open("keys.secret", "w") as f:

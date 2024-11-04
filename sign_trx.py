@@ -1,4 +1,5 @@
-from stellar_sdk import Keypair, TransactionBuilder, Network
+import base64
+from stellar_sdk import Keypair, TransactionBuilder, Network, Server
 
 # Function to read keys from file (with error handling)
 
@@ -24,19 +25,24 @@ keypair, public_key = read_keys()
 # Message to sign
 message = "DEV30K"
 
-# Build transaction
-tx = TransactionBuilder(source_account=public_key,
-                        network=Network.TESTNET,  # Replace with desired network
-                        fee=100)  # Adjust fee as needed
 
-# Add manage_data operation with MEMO field containing the signature
-tx.add_operation(TransactionBuilder.manage_data_op(
-    key="memo",
-    value=keypair.sign(message.encode()).decode()
-))
+def write():
+    server = Server(horizon_url="https://horizon-testnet.stellar.org")
+    msg_b64 = base64.encodestring(message)
+    print("base64: %s" % msg_b64)
+    # assinar
+    assinatura = keypair.sign(msg_b64)
+    print("assinatura: %s" % assinatura)
+    transaction = (
+        TransactionBuilder(source_account=public_key,
+                           network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE, base_fee=100,)
+        .set_timeout(30)
+        .append_manage_data_op(data_name="desafio", data_value=assinatura)
+        .build()
+    )
 
-# Build the transaction envelope
-tx_envelope = tx.build()
+    transaction.sign(keypair)
 
-# Print the transaction envelope (includes the signed message in MEMO)
-print(tx_envelope.to_xdr())
+    # try:
+    response = server.submit_transaction(transaction)
+    print(f"Hash: {response['hash']}")

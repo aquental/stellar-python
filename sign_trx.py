@@ -21,7 +21,7 @@ def read_keys():
 
 # Read keys
 keypair, public_key = read_keys()
-server = Server(horizon_url="https://horizon-testnet.stellar.org")
+server = Server(horizon_url="https://horizon.stellar.org")
 
 message = "DEV30K".encode()
 message_b64 = base64.b64encode(message)
@@ -30,16 +30,18 @@ print(f"base64: {message_b64.decode()}")
 assinatura = keypair.sign(message_b64)
 print(f"assinatura (hex): {assinatura.hex()}")
 
+source_account = server.load_account(public_key)
+base_fee = server.fetch_base_fee()
 # trx
 transaction = (
     TransactionBuilder(
-        source_account=public_key,
-        network_passphrase=Network.STANDALONE_NETWORK_PASSPHRASE,
-        base_fee=100
+        source_account=source_account,
+        network_passphrase=Network.PUBLIC_NETWORK_PASSPHRASE,
+        base_fee=base_fee
     )
     .set_timeout(50)
     .append_manage_data_op(data_name="desafio", data_value=assinatura)
-    .build
+    .build()
 )
 
 transaction.sign(keypair)

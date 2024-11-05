@@ -21,28 +21,29 @@ def read_keys():
 
 # Read keys
 keypair, public_key = read_keys()
+server = Server(horizon_url="https://horizon-testnet.stellar.org")
 
-# Message to sign
-message = "DEV30K"
+message = "DEV30K".encode()
+message_b64 = base64.b64encode(message)
+print(f"base64: {message_b64.decode()}")
+# assinar
+assinatura = keypair.sign(message_b64)
+print(f"assinatura (hex): {assinatura.hex()}")
 
-
-def write():
-    server = Server(horizon_url="https://horizon-testnet.stellar.org")
-    msg_b64 = base64.encodestring(message)
-    print("base64: %s" % msg_b64)
-    # assinar
-    assinatura = keypair.sign(msg_b64)
-    print("assinatura: %s" % assinatura)
-    transaction = (
-        TransactionBuilder(source_account=public_key,
-                           network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE, base_fee=100,)
-        .set_timeout(30)
-        .append_manage_data_op(data_name="desafio", data_value=assinatura)
-        .build()
+# trx
+transaction = (
+    TransactionBuilder(
+        source_account=public_key,
+        network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE,
+        base_fee=100
     )
+    .set_timeout(30)
+    .append_manage_data_op(data_name="desafio", data_value=assinatura)
+    .build()
+)
 
-    transaction.sign(keypair)
+transaction.sign(keypair)
 
-    # try:
-    response = server.submit_transaction(transaction)
-    print(f"Hash: {response['hash']}")
+# try:
+response = server.submit_transaction(transaction)
+print(f"Hash: {response['hash']}")

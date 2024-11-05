@@ -34,12 +34,12 @@ print(f"assinatura (hex): {assinatura.hex()}")
 transaction = (
     TransactionBuilder(
         source_account=public_key,
-        network_passphrase=Network.TESTNET_NETWORK_PASSPHRASE,
+        network_passphrase=Network.STANDALONE_NETWORK_PASSPHRASE,
         base_fee=100
     )
-    .set_timeout(30)
+    .set_timeout(50)
     .append_manage_data_op(data_name="desafio", data_value=assinatura)
-    .build()
+    .build
 )
 
 transaction.sign(keypair)
